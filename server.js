@@ -1,5 +1,5 @@
 
-//process.loadEnvFile() //process.loadEnvFile(['./dev.env','./dev2.env'])
+process.loadEnvFile() //process.loadEnvFile(['./dev.env','./dev2.env'])
 
 
 var express = require("express");

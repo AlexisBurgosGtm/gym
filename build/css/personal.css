@@ -1,0 +1,88 @@
+  .h-full{
+      width: 100%
+  }
+
+  .f-grande{
+    font-size: 150%;
+  }
+  
+  .btn-bottom-l { 
+    position: fixed;
+    z-index: 1088;
+    left: 5%;
+    right: 95%;
+    bottom: 35px;
+  }
+  
+  .btn-bottom-ml { 
+    position: fixed;
+    z-index: 1088;
+    left: 30%;
+    right: 70%;
+    bottom: 35px;
+  }
+  
+  .btn-bottom-mr { 
+    position: fixed;
+    z-index: 1088;
+    left: 50%;
+    right: 50%;
+    bottom: 35px;
+  }
+  
+  .btn-bottom-r { 
+    position: fixed;
+    z-index: 1088;
+    left: 85%;
+    right: 15%;
+    bottom: 35px;
+  }  
+
+  .card-rounded {
+        border-top-right-radius: 15px;
+        border-top-left-radius: 15px;
+        border-bottom-right-radius: 15px;
+        border-bottom-left-radius: 15px;
+  };
+
+      
+  .modal-with-scroll{
+        overflow-y: scroll; 
+  }
+      
+      
+  .negrita {
+        font-weight: bold;
+  }
+      
+  .hidden{
+        visibility: hidden;
+  }
+
+  .mano {
+    cursor: pointer;
+  }
+   
+  .oculto{
+        visibility: hidden;
+  }
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
+.btn-circle.btn-xl {
+    width: 70px;
+    height: 70px;
+    padding: 10px 16px;
+    border-radius: 35px;
+    font-size: 24px;
+    line-height: 1.33;
+}
+
