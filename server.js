@@ -60,15 +60,30 @@ app.get("/login",function(req,res){
 
 
 
-app.get("/despacho_finalizado",function(req,res){
+app.post("/insert_cliente",function(req,res){
 
-  const {empnit,coddoc,correlativo} = req.query;
+  const {nombre,telefono,nacimiento,fecha} = req.body;
 
-  io.emit('fin_despacho', empnit,coddoc,correlativo);
+  let qry = `
+    INSERT INTO GYM_CLIENTES (NOMCLIE,TELCLIE,FECHA_NACIMIENTO,FECHA_INICIO) 
+    SELECT '${nombre}' AS NOMCLIE,'${telefono}' AS TELCLIE,'${nacimiento}' AS FECHA_NACIMIENTO,'${fecha}' AS FECHA_INICIO; 
+  `;
 
-  res.send('ok')
+  execute.QueryToken(res,qry,'')
 
-}); 
+});
+
+app.post("/select_clientes",function(req,res){
+
+  //const {} = req.body;
+
+  let qry = `
+    SELECT NOMCLIE,TELCLIE,FECHA_NACIMIENTO,FECHA_INICIO FROM GYM_CLIENTES; 
+  `;
+
+  execute.QueryToken(res,qry,'')
+
+});  
 
 
 

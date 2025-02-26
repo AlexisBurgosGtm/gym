@@ -47,7 +47,7 @@ function getView(){
                                 </a>
 
                                 <div class="contacts__info">
-                                    <strong>Clientes / Suscritos</strong>
+                                    <strong>GymBros</strong>
                                     <small></small>
                                 </div>
 
@@ -82,7 +82,7 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
                     
-                    <h2>Listado de Clientes</h2>
+                    <h2>Listado de GymBros</h2>
 
                     <div class="table-responsive col-12">
                         <table class="table table-responsive table-hover col-12" id="tblClientes">
@@ -122,10 +122,10 @@ function getView(){
                             <div class="card card-rounded">
                                 <div class="card-body p-2">
 
-                                    <h3>Datos del Cliente</h3>
+                                    <h3>Datos del GymBro</h3>
 
                                     <div class="form-group">
-                                        <label class="negrita text-info">Nombre del Cliente</label>
+                                        <label class="negrita text-info">Nombre del GymBro</label>
                                         <input type="text" class="form-control" id="txtClienteNombre">
                                     </div>
                                     <div class="form-group">
@@ -175,7 +175,7 @@ function getView(){
                         <table class="table table-responsive table-bordered col-12" id="tblPagos">
                             <thead class="">
                                 <tr>
-                                    <td>CLIENTE</td>
+                                    <td>GYMBRO</td>
                                     <td>MES</td>
                                     <td>IMPORTE</td>
                                     <td></td>
@@ -310,13 +310,176 @@ function listeners_clientes(){
 
 
     document.getElementById('btnNuevoCliente').addEventListener('click',()=>{
+        
+        clean_data_cliente();
+
         $("#modal_cliente").modal('show');
 
     })
 
+    document.getElementById('txtClienteNombre').addEventListener('input',()=>{
+        document.getElementById('txtClienteNombre').value = document.getElementById('txtClienteNombre').value.toUpperCase();
+    })
 
+    let btnGuardarCliente = document.getElementById('btnGuardarCliente');
+    btnGuardarCliente.addEventListener('click',()=>{
+
+        let nombre = document.getElementById('txtClienteNombre').value || '';
+        let telefono = document.getElementById('txtClienteTelefono').value || '';
+        let nacimiento= document.getElementById('txtClienteFecha').value
+
+        if(nombre==''){F.AvisoError('Indique el nombre del Gymbro');return;}
+
+
+        F.Confirmacion('Esta seguro que quiere CREAR este nuevo GYMBRO?')
+        .then((value)=>{
+            if(value==true){
+
+
+                btnGuardarCliente.disabled = true;
+                btnGuardarCliente.innerHTML = `<i class="zmdi zmdi-save zmdi-hc-fw spin"></i>`;
+
+                insert_cliente(nombre,telefono,nacimiento)
+                .then(()=>{
+
+                    F.Aviso('Gymbro creado exitosamente!!');
+                  
+
+                    btnGuardarCliente.disabled = false;
+                    btnGuardarCliente.innerHTML = `<i class="zmdi zmdi-save zmdi-hc-fw"></i>`;
+
+                    $("#modal_cliente").modal('hide');
+
+                    F.hablar('Gymbro creado exitosamente');
+
+
+                    get_tbl_clientes();
+
+                })
+                .catch((error)=>{
+                    console.log(error);
+
+                    F.AvisoError('No se pudo crear este Gymbro');
+
+                    btnGuardarCliente.disabled = false;
+                    btnGuardarCliente.innerHTML = `<i class="zmdi zmdi-save zmdi-hc-fw"></i>`;
+                })
+
+
+            }
+        })
+
+    });
+
+
+
+    
+    get_tbl_clientes();
 
 };
+
+function clean_data_cliente(){
+    document.getElementById('txtClienteNombre').value = '';
+    document.getElementById('txtClienteTelefono').value = '';
+    document.getElementById('txtClienteFecha').value = F.getFecha();
+}
+
+function insert_cliente(nombre,telefono,fecha){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/insert_cliente', {nombre:nombre,telefono:telefono,nacimiento:fecha,fecha:F.getFecha()})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+
+function data_clientes(){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/select_clientes')
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+
+function get_tbl_clientes(){
+
+
+    let container = document.getElementById('tblDataClientes');
+    container.innerHTML = GlobalLoader;
+
+    let str = '';
+
+
+    data_clientes()
+    .then((data)=>{
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.NOMCLIE}</td>
+                <td>${r.TELCLIE}</td>
+                <td></td>
+                <td>
+                    <button class="btn btn-danger btn-circle btn-md mano">
+                            <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos....';
+    })
+
+};
+
+
+
+
+
+
+
+
 
 function listeners_pagos(){
     
