@@ -83,10 +83,13 @@ function getView(){
                 <div class="card-body p-2">
                     
                     <h2>Listado de GymBros</h2>
+                    <br>
+                    <label class="negrita text-danger" id="lbTotalClientes"></label>
+                    <br>
 
                     <div class="table-responsive col-12">
                         <table class="table table-responsive table-hover col-12" id="tblClientes">
-                            <thead class="bg-base text-white">
+                            <thead class="text-warning negrita">
                                 <tr>
                                     <td>NOMBRE</td>
                                     <td>TELEFONO</td>
@@ -447,11 +450,12 @@ function get_tbl_clientes(){
     container.innerHTML = GlobalLoader;
 
     let str = '';
-
+    let contador = 0;
 
     data_clientes()
     .then((data)=>{
         data.recordset.map((r)=>{
+            contador +=1;
             str += `
             <tr>
                 <td>${r.NOMCLIE}</td>
@@ -466,9 +470,11 @@ function get_tbl_clientes(){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalClientes').innerText = `Total Gymbros ${contador}`;
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos....';
+        document.getElementById('lbTotalClientes').innerText = '';
     })
 
 };
