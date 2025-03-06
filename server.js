@@ -60,6 +60,8 @@ app.get("/login",function(req,res){
 
 
 
+// clientes
+
 app.post("/insert_cliente",function(req,res){
 
   const {nombre,telefono,nacimiento,fecha} = req.body;
@@ -78,7 +80,9 @@ app.post("/select_clientes",function(req,res){
   //const {} = req.body;
 
   let qry = `
-    SELECT NOMCLIE,TELCLIE,FECHA_NACIMIENTO,FECHA_INICIO FROM GYM_CLIENTES; 
+    SELECT CODCLIE, NOMCLIE,TELCLIE,FECHA_NACIMIENTO,FECHA_INICIO 
+    FROM GYM_CLIENTES
+    ORDER BY NOMCLIE; 
   `;
 
   execute.QueryToken(res,qry,'')
@@ -86,6 +90,48 @@ app.post("/select_clientes",function(req,res){
 });  
 
 
+//clientes
+
+//pagos
+
+app.post("/insert_pago",function(req,res){
+
+  const {codclie,codmesanio,fecha,importe} = req.body;
+
+  let qry = `
+    INSERT INTO GYM_PAGOS (CODCLIE,CODMESANIO,FECHA,IMPORTE) 
+      SELECT ${codclie} AS CODCLIE,'${codmesanio}' AS CODMESANIO,
+      '${fecha}' AS FECHA, ${importe} AS IMPORTE; 
+  `;
+
+  console.log(qry)
+
+  execute.QueryToken(res,qry,'')
+
+});
+
+app.post("/select_pagos",function(req,res){
+
+  const {fi,ff} = req.body;
+
+  let qry = `
+          SELECT GYM_PAGOS.ID, 
+            GYM_PAGOS.CODCLIE, 
+            GYM_CLIENTES.NOMCLIE, 
+            GYM_PAGOS.CODMESANIO, 
+            GYM_PAGOS.FECHA, 
+            GYM_PAGOS.IMPORTE
+          FROM GYM_PAGOS LEFT OUTER JOIN
+            GYM_CLIENTES ON GYM_PAGOS.CODCLIE = GYM_CLIENTES.CODCLIE
+          WHERE (GYM_PAGOS.FECHA BETWEEN '${fi}' AND '${ff}')
+          ORDER BY GYM_PAGOS.FECHA; 
+  `;
+
+  execute.QueryToken(res,qry,'')
+
+});
+
+//pagos
 
 
 

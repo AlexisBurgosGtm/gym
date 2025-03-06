@@ -8,11 +8,17 @@ function getView(){
                             ${view.menu()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.clientes_listado() + view.modal_cliente_nuevo()}    
+                            ${view.clientes_listado() + view.modal_cliente_nuevo() + view.modal_pago_nuevo()}    
                             
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.pagos_listado() + view.modal_pago_nuevo()}
+                            ${view.pagos_listado() }
+                        </div>   
+                        <div class="tab-pane fade" id="cuatro" role="tabpanel" aria-labelledby="home-tab">
+                            ${view.pendientes_listado() }
+                        </div>  
+                        <div class="tab-pane fade" id="cinco" role="tabpanel" aria-labelledby="home-tab">
+                            
                         </div>    
                     </div>
 
@@ -28,6 +34,14 @@ function getView(){
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-tres" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
+                        </li> 
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
+                        </li>  
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
                     
@@ -39,7 +53,7 @@ function getView(){
             return `
              <div class="contacts row">
 
-                    <div class="col-6">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                       
                             <div class="contacts__item" id="btnSuscritos">
                                 <a href="#" class="contacts__img">
@@ -56,7 +70,7 @@ function getView(){
 
                     </div>
 
-                    <div class="col-6">
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
                         
                             <div class="contacts__item" id="btnPagos">
                                 <a href="#" class="contacts__img">
@@ -64,12 +78,29 @@ function getView(){
                                 </a>
 
                                 <div class="contacts__info">
-                                    <strong>Pagos</strong>
+                                    <strong>Lista Pagos</strong>
                                     <small></small>
                                 </div>
 
                                 <button class="contacts__btn"></button>
                             </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                      
+                            <div class="contacts__item" id="btnPendientes">
+                                <a href="#" class="contacts__img">
+                                    <img src="./favicon.png" alt="">
+                                </a>
+
+                                <div class="contacts__info">
+                                    <strong>Pagos Pendientes</strong>
+                                    <small></small>
+                                </div>
+
+                                <button class="contacts__btn"></button>
+                            </div>
+
                     </div>
 
                     
@@ -88,6 +119,10 @@ function getView(){
                     <br>
 
                     <div class="table-responsive col-12">
+                        <div class="form-group">
+                            <input type="text" class="form-control text-info" placeholder="Escriba para buscar..." id="txtClienteBuscar" oninput="F.FiltrarTabla('tblClientes','txtClienteBuscar')">
+                        </div>
+                        <br>
                         <table class="table table-responsive table-hover col-12" id="tblClientes">
                             <thead class="text-warning negrita">
                                 <tr>
@@ -167,40 +202,6 @@ function getView(){
             </div>
             `
         },
-        pagos_listado:()=>{
-            return `
-            <div class="card card-rounded shadow">
-                <div class="card-body p-2">
-
-                    <h2>Pagos Pendientes</h2>
-
-                    <div class="table-responsive col-12">
-                        <table class="table table-responsive table-bordered col-12" id="tblPagos">
-                            <thead class="">
-                                <tr>
-                                    <td>GYMBRO</td>
-                                    <td>MES</td>
-                                    <td>IMPORTE</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody id="tblDataPagos">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-secondary btn-circle btn-bottom-l btn-xl mano shadow" onclick="document.getElementById('tab-uno').click()">
-                <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
-            </button>
-
-            <button class="btn btn-success btn-circle btn-bottom-r btn-xl mano shadow" id="btnPagoNuevo">
-                <i class="zmdi zmdi-plus zmdi-hc-fw"></i>
-            </button>
-            `
-        },
         modal_pago_nuevo:()=>{
             return `
               <div id="modal_pago" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
@@ -213,14 +214,15 @@ function getView(){
                                 <div class="card-body p-2">
 
                                     <h3>Nuevo pago</h3>
-
+                                    <h5 class="text-warning negrita" id="lbPagoNomclie"><h5>
+                                    <br>
                                     <div class="form-group">
                                         <label class="negrita text-info">Mes a Pagar</label>
                                         <div class="input-group">
-                                            <select class="form-control negrita text-warning">
+                                            <select class="form-control negrita text-warning" id="cmbPagoMes">
                                                     <option value="">ENERO</option>
                                             </select>
-                                            <select class="form-control negrita text-warning">
+                                            <select class="form-control negrita text-warning" id="cmbPagoAnio">
                                                 <option value="2025">2025</option>
                                             </select>
                                         </div>
@@ -249,7 +251,7 @@ function getView(){
                                 </div>
 
                                 <div class="col-6">
-                                    <button class="btn btn-info btn-circle btn-xl mano shadow" id="btnGuardarCliente">
+                                    <button class="btn btn-info btn-circle btn-xl mano shadow" id="btnGuardarPago">
                                         <i class="zmdi zmdi-save zmdi-hc-fw"></i>
                                     </button>
                                 </div>
@@ -263,6 +265,97 @@ function getView(){
             </div>
             `
         },
+        pagos_listado:()=>{
+            return `
+            <div class="card card-rounded shadow">
+                <div class="card-body p-2">
+
+                    <h2>Pagos Pendientes</h2>
+
+                    <div class="table-responsive col-12">
+
+                        <div class="row">
+                            <div class="col-6">
+                                
+                                <div class="form-group">
+                                    <label>Fecha Inicial</label>
+                                    <input type="date" class="form-control negrita text-success" id="txtPagoFinicial">
+                                </div>
+
+                            </div>
+                            <div class="col-6">
+
+                                <div class="form-group">
+                                    <label>Fecha Final</label>
+                                    <input type="date" class="form-control negrita text-success" id="txtPagoFfinal">
+                                </div>
+
+                            </div>
+                        </div>
+                        
+                        <br>
+
+                        <table class="table table-responsive table-bordered col-12" id="tblPagos">
+                            <thead class="negrita">
+                                <tr>
+                                    <td>GYMBRO</td>
+                                    <td>MES</td>
+                                    <td>FECHA</td>
+                                    <td>IMPORTE</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataPagos">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-bottom-l btn-xl mano shadow" onclick="document.getElementById('tab-uno').click()">
+                <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+            </button>
+
+          
+            `
+        },
+        pendientes_listado:()=>{
+            return `
+            <div class="card card-rounded shadow">
+                <div class="card-body p-2">
+                    
+                    <h2>Pagos Pendientes</h2>
+                    <br>
+                    <label class="negrita text-danger" id=""></label>
+                    <br>
+
+                    <div class="table-responsive col-12">
+                        <div class="form-group">
+                            <input type="text" class="form-control text-info" placeholder="Escriba para buscar..." id="txtClienteBuscar" oninput="F.FiltrarTabla('tblClientes','txtClienteBuscar')">
+                        </div>
+                        <br>
+                        <table class="table table-responsive table-hover col-12" id="">
+                            <thead class="text-danger negrita">
+                                <tr>
+                                    <td>NOMBRE</td>
+                                    <td>TELEFONO</td>
+                                    <td>MES</td>
+                                    <td></td>
+                                </tr>
+                            </thead>
+                            <tbody id="tblDataPendientes">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary btn-circle btn-bottom-l btn-xl mano shadow" onclick="document.getElementById('tab-uno').click()">
+                <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+            </button>
+            `
+        }
+        
     }
 
     root.innerHTML = view.body();
@@ -276,12 +369,20 @@ function addListeners(){
     document.getElementById('btnSuscritos').addEventListener('click',()=>{
 
         document.getElementById('tab-dos').click();
+        
+        get_tbl_clientes();
 
     })
 
     document.getElementById('btnPagos').addEventListener('click',()=>{
 
         document.getElementById('tab-tres').click();
+        tbl_pagos();  
+    })
+
+    document.getElementById('btnPendientes').addEventListener('click',()=>{
+
+        document.getElementById('tab-cuatro').click();
         
     })
 
@@ -377,7 +478,6 @@ function listeners_clientes(){
 
 
     
-    get_tbl_clientes();
 
 };
 
@@ -460,7 +560,12 @@ function get_tbl_clientes(){
             <tr>
                 <td>${r.NOMCLIE}</td>
                 <td>${r.TELCLIE}</td>
-                <td></td>
+                <td>
+                    <button class="btn btn-info btn-circle btn-md mano" 
+                    onclick="get_pago('${r.CODCLIE}','${r.NOMCLIE}')">
+                            <i class="zmdi zmdi-fire zmdi-hc-fw"></i>
+                    </button>
+                </td>
                 <td>
                     <button class="btn btn-danger btn-circle btn-md mano">
                             <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
@@ -492,14 +597,177 @@ function listeners_pagos(){
 
     document.getElementById('txtPagoFecha').value = F.getFecha();
 
+
+    document.getElementById('txtPagoFinicial').value = F.getFecha();
+    document.getElementById('txtPagoFfinal').value = F.getFecha();
+
+
+
     document.getElementById('txtPagoImporte').value = config_pago_suscripcion;
 
 
+    document.getElementById('cmbPagoMes').innerHTML = F.ComboMeses();
+    document.getElementById('cmbPagoMes').value = F.get_mes_curso();
 
-    document.getElementById('btnPagoNuevo').addEventListener('click',()=>{
-        $("#modal_pago").modal('show');
+    document.getElementById('cmbPagoAnio').innerHTML = F.ComboAnio();
+    document.getElementById('cmbPagoAnio').value = F.get_anio_curso();
 
+
+
+
+
+
+    let btnGuardarPago = document.getElementById('btnGuardarPago');
+    btnGuardarPago.addEventListener('click',()=>{
+
+
+        F.Confirmacion('¿Está seguro que desea guardar este nuevo pago?')
+        .then((value)=>{
+            if(value==true){
+
+                    let codclie = selected_codclie;
+                    let codmesanio =`${document.getElementById('cmbPagoMes').value}-${document.getElementById('cmbPagoAnio').value}`;
+                    let fecha = F.devuelveFecha('txtPagoFecha');  
+                    let importe = document.getElementById('txtPagoImporte').value;
+
+                    btnGuardarPago.disabled = true;
+                    btnGuardarPago.innerHTML = `<i class="zmdi zmdi-save zmdi-hc-fw"></i>Cargando...`;
+
+                    insert_pago(selected_codclie,codmesanio,fecha,importe)
+                    .then(()=>{
+                        
+                        F.Aviso('Pago registrado exitosamente!!');
+                        
+                        $("#modal_pago").modal('hide');
+
+                        tbl_pagos();
+                    })
+                    .catch(()=>{
+                        F.AvisoError('No se pudo registrar el pago');
+                        btnGuardarPago.disabled = false;
+                        btnGuardarPago.innerHTML = `<i class="zmdi zmdi-save zmdi-hc-fw"></i>`;
+                    })
+
+            }
+        })
+
+        
+
+    });
+
+
+  
+
+};
+
+function get_pago(codclie,nomclie){
+
+
+    selected_codclie = codclie;
+    document.getElementById('lbPagoNomclie').innerText = nomclie;
+
+     $("#modal_pago").modal('show');
+
+
+}
+
+
+function insert_pago(codclie,codmesanio,fecha,importe){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/insert_pago', {
+                                codclie:codclie,
+                                codmesanio:codmesanio,
+                                fecha:fecha,
+                                importe:importe
+                                    })
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+
+function data_pagos(fechainicial,fechafinal){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/select_pagos',{fi:fechainicial,ff:fechafinal})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+function tbl_pagos(){
+
+
+    let fi = F.devuelveFecha('txtPagoFinicial');
+    let ff = F.devuelveFecha('txtPagoFfinal');
+
+    let container = document.getElementById('tblDataPagos');
+    container.innerHTML = GlobalLoader;
+
+    let str = '';
+
+    data_pagos(fi,ff)
+    .then((data)=>{
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${r.NOMCLIE}</td>
+                <td>${r.CODMESANIO}</td>
+                <td>${F.convertDateNormal(r.FECHA)}</td>
+                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                <td>
+                    <button class="btn btn-danger btn-circle btn-md mano">
+                            <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
     })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+
 
 
 };
