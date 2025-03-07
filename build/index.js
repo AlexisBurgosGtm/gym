@@ -36,11 +36,11 @@ function getView(){
                                 <i class="fal fa-comments"></i></a>
                         </li> 
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="tab-cuatro" data-toggle="tab" href="#cuatro" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>  
                         <li class="nav-item">
-                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#tres" role="tab" aria-controls="home" aria-selected="true">
+                            <a class="nav-link negrita text-danger" id="tab-cinco" data-toggle="tab" href="#cinco" role="tab" aria-controls="home" aria-selected="true">
                                 <i class="fal fa-comments"></i></a>
                         </li>         
                     </ul>
@@ -615,6 +615,13 @@ function listeners_pagos(){
 
 
 
+    document.getElementById('txtPagoFinicial').addEventListener('change',()=>{
+        tbl_pagos();
+    })
+
+    document.getElementById('txtPagoFfinal').addEventListener('change',()=>{
+        tbl_pagos();
+    })
 
 
     let btnGuardarPago = document.getElementById('btnGuardarPago');
