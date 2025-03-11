@@ -89,6 +89,18 @@ app.post("/select_clientes",function(req,res){
 
 });  
 
+app.post("/delete_cliente",function(req,res){
+
+    const {codclie} = req.body;
+
+    let qry = `DELETE FROM GYM_CLIENTES WHERE CODCLIE=${codclie};`;
+
+
+
+    execute.QueryToken(res,qry,'')
+
+});
+
 
 //clientes
 
@@ -125,6 +137,37 @@ app.post("/select_pagos",function(req,res){
             GYM_CLIENTES ON GYM_PAGOS.CODCLIE = GYM_CLIENTES.CODCLIE
           WHERE (GYM_PAGOS.FECHA BETWEEN '${fi}' AND '${ff}')
           ORDER BY GYM_PAGOS.FECHA; 
+  `;
+
+  execute.QueryToken(res,qry,'')
+
+});
+
+
+app.post("/delete_pago",function(req,res){
+
+  const {idpago} = req.body;
+
+  let qry = `DELETE FROM GYM_PAGOS WHERE ID=${idpago};`;
+
+
+
+  execute.QueryToken(res,qry,'')
+
+});
+
+
+
+app.post("/select_pagos_pendientes",function(req,res){
+
+  const {mes,anio} = req.body;
+
+  let qry = `
+        SELECT CODCLIE, NOMCLIE, TELCLIE, FECHA, CODMESANIO, IMPORTE
+        FROM     view_pagos
+        WHERE  (IMPORTE = 0) 
+        AND (MES = ${mes}) AND (ANIO = ${anio})
+        ORDER BY NOMCLIE
   `;
 
   execute.QueryToken(res,qry,'')

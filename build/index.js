@@ -8,7 +8,7 @@ function getView(){
                             ${view.menu()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
-                            ${view.clientes_listado() + view.modal_cliente_nuevo() + view.modal_pago_nuevo()}    
+                            ${view.clientes_listado() + view.modal_cliente_nuevo()}    
                             
                         </div>
                         <div class="tab-pane fade" id="tres" role="tabpanel" aria-labelledby="home-tab">
@@ -46,7 +46,7 @@ function getView(){
                     </ul>
                     
                 </div>
-               
+               ${view.modal_pago_nuevo()}
             `
         },
         menu:()=>{
@@ -270,7 +270,7 @@ function getView(){
             <div class="card card-rounded shadow">
                 <div class="card-body p-2">
 
-                    <h2>Pagos Pendientes</h2>
+                    <h2>Pagos realizados</h2>
 
                     <div class="table-responsive col-12">
 
@@ -331,9 +331,16 @@ function getView(){
 
                     <div class="table-responsive col-12">
                         <div class="form-group">
-                            <input type="text" class="form-control text-info" placeholder="Escriba para buscar..." id="txtClienteBuscar" oninput="F.FiltrarTabla('tblClientes','txtClienteBuscar')">
+                            <label>Seleccione un Mes y Año</label>
+                            <div class="input-group">
+                                <select class="form-control text-warning" id="cmbPMes">
+                                </select>
+                                <select class="form-control text-warning" id="cmbPAnio">
+                                </select>
+                            </div>
                         </div>
                         <br>
+                        <h3 id="lbTotalPendientes"></h3>
                         <table class="table table-responsive table-hover col-12" id="">
                             <thead class="text-danger negrita">
                                 <tr>
@@ -384,6 +391,8 @@ function addListeners(){
 
         document.getElementById('tab-cuatro').click();
         
+        tbl_pagos_pendientes();
+
     })
 
 
@@ -556,6 +565,7 @@ function get_tbl_clientes(){
     .then((data)=>{
         data.recordset.map((r)=>{
             contador +=1;
+            let btnE = `btnE${r.CODCLIE}`;
             str += `
             <tr>
                 <td>${r.NOMCLIE}</td>
@@ -567,7 +577,8 @@ function get_tbl_clientes(){
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-danger btn-circle btn-md mano">
+                    <button class="btn btn-danger btn-circle btn-md mano"
+                    onclick="delete_cliente('${r.CODCLIE}','${btnE}')" id='${btnE}'>
                             <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
                     </button>
                 </td>
@@ -584,6 +595,65 @@ function get_tbl_clientes(){
 
 };
 
+
+
+function data_delete_cliente(codclie){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/delete_cliente',{codclie:codclie})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+function delete_cliente(codclie,idbtn){
+
+
+    let btn = document.getElementById(idbtn);
+
+   
+
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR a este GYMBRO?')
+    .then((value)=>{
+        if(value==true){
+
+            btn.disabled = true;
+            
+            data_delete_cliente(codclie)
+            .then(()=>{
+                F.Aviso('Gymbro eliminado exitosamente!!');
+                get_tbl_clientes();
+            })
+            .catch(()=>{
+                btn.disabled = false;
+                F.AvisoError('No se pudo ELIMINAR');
+            })
+
+
+        }
+    })
+
+
+};
 
 
 
@@ -648,6 +718,8 @@ function listeners_pagos(){
                         $("#modal_pago").modal('hide');
 
                         tbl_pagos();
+                        tbl_pagos_pendientes();
+                        
                     })
                     .catch(()=>{
                         F.AvisoError('No se pudo registrar el pago');
@@ -661,6 +733,30 @@ function listeners_pagos(){
         
 
     });
+
+
+
+    let cmbPMes = document.getElementById('cmbPMes');
+    let cmbPAnio = document.getElementById('cmbPAnio');
+
+
+    cmbPMes.innerHTML = F.ComboMeses(); cmbPMes.value = F.get_mes_curso();
+    cmbPAnio.innerHTML = F.ComboAnio(); cmbPAnio.value = F.get_anio_curso();
+
+
+    cmbPMes.addEventListener('change',()=>{
+
+        tbl_pagos_pendientes();
+
+    })
+
+    cmbPAnio.addEventListener('change',()=>{
+
+        tbl_pagos_pendientes();
+        
+    })
+
+    
 
 
   
@@ -753,6 +849,7 @@ function tbl_pagos(){
     data_pagos(fi,ff)
     .then((data)=>{
         data.recordset.map((r)=>{
+            let btnEP = `btnEP${r.ID}`;
             str += `
             <tr>
                 <td>${r.NOMCLIE}</td>
@@ -760,7 +857,8 @@ function tbl_pagos(){
                 <td>${F.convertDateNormal(r.FECHA)}</td>
                 <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
                 <td>
-                    <button class="btn btn-danger btn-circle btn-md mano">
+                    <button class="btn btn-danger btn-circle btn-md mano"
+                    onclick="delete_pago('${r.ID}','${btnEP}')">
                             <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
                     </button>
                 </td>
@@ -776,5 +874,134 @@ function tbl_pagos(){
 
 
 
+
+};
+
+
+function data_delete_pago(idpago){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/delete_pago',{idpago:idpago})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+function delete_pago(idpago,idbtn){
+
+    let btn = document.getElementById(idbtn);
+
+
+
+    F.Confirmacion('¿Está seguro que desea ELIMINAR a este PAGO?')
+    .then((value)=>{
+        if(value==true){
+            btn.disabled = true;
+
+            data_delete_pago(idpago)
+            .then(()=>{
+                F.Aviso('Pago eliminado exitosamente!!');
+                tbl_pagos();
+            })
+            .catch(()=>{
+                btn.disabled = false;
+                F.AvisoError('No se pudo ELIMINAR');
+            })
+
+
+        }
+    })
+
+
+};
+
+
+
+
+function data_pagos_pendientes(mes,anio){
+
+    return new Promise((resolve,reject)=>{
+
+        axios.post('/select_pagos_pendientes',{mes:mes,anio:anio})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+function tbl_pagos_pendientes(){
+
+    
+    let mes = document.getElementById('cmbPMes').value;
+    let anio = document.getElementById('cmbPAnio').value;
+
+
+    let container = document.getElementById('tblDataPendientes');
+    container.innerHTML = GlobalLoader;
+
+    let contador = 0;
+
+    data_pagos_pendientes(mes,anio)
+    .then((data)=>{
+
+        let str = '';
+        data.recordset.map((r)=>{
+            contador += 1;
+            str += `
+            <tr>
+                <td>${r.NOMCLIE}</td>
+                <td>${r.TELCLIE}</td>
+                <td>${r.CODMESANIO}</td>
+                <td>
+                 <button class="btn btn-info btn-circle btn-md mano" 
+                    onclick="get_pago('${r.CODCLIE}','${r.NOMCLIE}')">
+                            <i class="zmdi zmdi-fire zmdi-hc-fw"></i>
+                    </button>
+                </td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+        document.getElementById('lbTotalPendientes').innerText = `Pendientes: ${contador}`;
+    })
+    .catch(()=>{
+
+        container.innerHTML = 'No se cargaron datos.....';
+        document.getElementById('lbTotalPendientes').innerText = '';
+    })
 
 };
