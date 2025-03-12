@@ -89,6 +89,25 @@ app.post("/select_clientes",function(req,res){
 
 });  
 
+app.post("/select_historial_cliente",function(req,res){
+
+    const {codclie,mes,anio} = req.body;
+
+    let qry = `
+        SELECT CODCLIE,NOMCLIE,TELCLIE,
+            FECHA_NACIMIENTO,FECHA_INICIO,
+            CODMESANIO,FECHA,IMPORTE
+        FROM view_pagos
+        WHERE CODCLIE=${codclie} 
+          AND MES <= ${mes} 
+          AND ANIO <= ${anio}
+        ORDER BY MES DESC, ANIO DESC;
+    `;
+
+    execute.QueryToken(res,qry,'')
+
+});  
+
 app.post("/delete_cliente",function(req,res){
 
     const {codclie} = req.body;

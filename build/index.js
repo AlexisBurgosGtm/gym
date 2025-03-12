@@ -46,7 +46,7 @@ function getView(){
                     </ul>
                     
                 </div>
-               ${view.modal_pago_nuevo()}
+               ${view.modal_historial() + view.modal_pago_nuevo()}
             `
         },
         menu:()=>{
@@ -123,11 +123,10 @@ function getView(){
                             <input type="text" class="form-control text-info" placeholder="Escriba para buscar..." id="txtClienteBuscar" oninput="F.FiltrarTabla('tblClientes','txtClienteBuscar')">
                         </div>
                         <br>
-                        <table class="table table-responsive table-hover col-12" id="tblClientes">
+                        <table class="table table-hover col-12" id="tblClientes">
                             <thead class="text-warning negrita">
                                 <tr>
-                                    <td>NOMBRE</td>
-                                    <td>TELEFONO</td>
+                                    <td>NOMBRE / TELEFONO</td>
                                     <td></td>
                                     <td></td>
                                 </tr>
@@ -295,12 +294,10 @@ function getView(){
                         
                         <br>
 
-                        <table class="table table-responsive table-bordered col-12" id="tblPagos">
+                        <table class="table table-bordered col-12 h-full" id="tblPagos">
                             <thead class="negrita">
                                 <tr>
-                                    <td>GYMBRO</td>
-                                    <td>MES</td>
-                                    <td>FECHA</td>
+                                    <td>GYMBRO / FECHA / MES</td>
                                     <td>IMPORTE</td>
                                     <td></td>
                                 </tr>
@@ -308,6 +305,7 @@ function getView(){
                             <tbody id="tblDataPagos">
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </div>
@@ -344,9 +342,8 @@ function getView(){
                         <table class="table table-responsive table-hover col-12" id="">
                             <thead class="text-danger negrita">
                                 <tr>
-                                    <td>NOMBRE</td>
-                                    <td>TELEFONO</td>
-                                    <td>MES</td>
+                                    <td>NOMBRE / TELEFONO</td>
+                                    <td></td>
                                     <td></td>
                                 </tr>
                             </thead>
@@ -361,7 +358,63 @@ function getView(){
                 <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
             </button>
             `
-        }
+        },
+        modal_historial:()=>{
+            return `
+              <div id="modal_historial" class="modal fade js-modal-settings modal-backdrop-transparent modal-with-scroll" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                       
+                        <div class="modal-body p-4">
+                            
+                            <div class="card card-rounded">
+                                <div class="card-body p-2">
+
+                                    <h3>Historial de Pagos del Gymbro</h3>
+                                    <h5 class="text-warning negrita" id="lbHNomclie"><h5>
+                                    
+
+                                    <div class="table-responsive">
+                                        
+                                        <table class="table table-bordered h-full col-12">
+                                            <thead class="negrita text-warning">
+                                                <tr>
+                                                    <td>FECHA PAGO</td>
+                                                    <td>MES</td>
+                                                    <td>IMPORTE</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tblDataHistorial">
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                                
+                            <div class="row">
+
+                                <div class="col-6">
+                                    <button class="btn btn-danger btn-circle btn-xl mano shadow" data-dismiss="modal">
+                                        <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>
+                                    </button>
+                                </div>
+
+                                <div class="col-6">
+                                 
+                                </div>
+
+                            </div>
+
+                        </div>
+                    
+                    </div>
+                </div>
+            </div>
+            `
+        },
         
     }
 
@@ -568,8 +621,16 @@ function get_tbl_clientes(){
             let btnE = `btnE${r.CODCLIE}`;
             str += `
             <tr>
-                <td>${r.NOMCLIE}</td>
-                <td>${r.TELCLIE}</td>
+                <td>${r.NOMCLIE}
+                    <br>
+                    <small class="negrita">Tel: ${r.TELCLIE}</small>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-circle btn-md mano" 
+                    onclick="get_historial('${r.CODCLIE}','${r.NOMCLIE}')">
+                            <i class="zmdi zmdi-widgets zmdi-hc-fw"></i>
+                    </button>
+                </td>
                 <td>
                     <button class="btn btn-info btn-circle btn-md mano" 
                     onclick="get_pago('${r.CODCLIE}','${r.NOMCLIE}')">
@@ -596,6 +657,63 @@ function get_tbl_clientes(){
 };
 
 
+function get_data_historial(codclie){
+
+ return new Promise((resolve,reject)=>{
+
+        let mes = F.get_mes_curso();
+        let anio = F.get_anio_curso();
+        
+        axios.post('/select_historial_cliente',{codclie:codclie,mes:mes,anio:anio})
+        .then((response) => {
+            if(response.status.toString()=='200'){
+                let data = response.data;
+                if(data.toString()=="error"){
+                    reject();
+                }else{
+                    if(Number(data.rowsAffected[0])>0){
+                        resolve(data);             
+                    }else{
+                        reject();
+                    } 
+                }       
+            }else{
+                reject();
+            }                   
+        }, (error) => {
+            reject();
+        });
+    }) 
+
+};
+
+function get_historial(codclie,nomclie){
+
+    $("#modal_historial").modal('show');
+
+    let container = document.getElementById('tblDataHistorial');
+    container.innerHTML = GlobalLoader;
+
+    get_data_historial(codclie)
+    .then((data)=>{
+        let str = '';
+        data.recordset.map((r)=>{
+            str += `
+            <tr>
+                <td>${F.convertDateNormal(r.FECHA)}</td>
+                <td>${r.CODMESANIO}</td>
+                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+            </tr>
+            `
+        })
+        container.innerHTML = str;
+    })
+    .catch(()=>{
+        container.innerHTML = 'No se cargaron datos...';
+    })
+
+
+};
 
 function data_delete_cliente(codclie){
 
@@ -852,12 +970,20 @@ function tbl_pagos(){
             let btnEP = `btnEP${r.ID}`;
             str += `
             <tr>
-                <td>${r.NOMCLIE}</td>
-                <td>${r.CODMESANIO}</td>
-                <td>${F.convertDateNormal(r.FECHA)}</td>
-                <td>${F.setMoneda(r.IMPORTE,'Q')}</td>
+                <td>${r.NOMCLIE}
+                    <br>
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="negrita">${F.convertDateNormal(r.FECHA)}</small>
+                        </div>
+                        <div class="col-6">
+                            <small class="negrita">M: ${r.CODMESANIO}</small>
+                        </div>
+                    </div>
+                </td>
+                <td class="negrita">${F.setMoneda(r.IMPORTE,'Q')}</td>
                 <td>
-                    <button class="btn btn-danger btn-circle btn-md mano"
+                    <button class="btn btn-danger btn-circle btn-md mano" id="${btnEP}"
                     onclick="delete_pago('${r.ID}','${btnEP}')">
                             <i class="zmdi zmdi-delete zmdi-hc-fw"></i>
                     </button>
@@ -983,11 +1109,18 @@ function tbl_pagos_pendientes(){
             contador += 1;
             str += `
             <tr>
-                <td>${r.NOMCLIE}</td>
-                <td>${r.TELCLIE}</td>
-                <td>${r.CODMESANIO}</td>
+                <td>${r.NOMCLIE}
+                    <br>
+                    <small class="negrita">Tel: ${r.TELCLIE}</small>
+                </td>
                 <td>
-                 <button class="btn btn-info btn-circle btn-md mano" 
+                    <button class="btn btn-warning btn-circle btn-md mano" 
+                    onclick="get_historial('${r.CODCLIE}','${r.NOMCLIE}')">
+                            <i class="zmdi zmdi-widgets zmdi-hc-fw"></i>
+                    </button>
+                </td>  
+                <td>
+                    <button class="btn btn-info btn-circle btn-md mano" 
                     onclick="get_pago('${r.CODCLIE}','${r.NOMCLIE}')">
                             <i class="zmdi zmdi-fire zmdi-hc-fw"></i>
                     </button>
