@@ -18,6 +18,7 @@ var io = require('socket.io')(http, { cors: { origin: '*' } });
 
 
 const cors = require('cors');
+const { exec } = require("child_process");
 app.use(cors({
     origin: '*'
 }));
@@ -54,8 +55,22 @@ app.get("/",function(req,res){
 
 
 
-app.get("/login",function(req,res){
-  res.redirect('/');
+
+
+
+app.post("/login",function(req,res){
+
+    const {u,p} = req.body;
+
+    let qry = `
+      SELECT USUARIO, CLAVE 
+        FROM GYM_USUARIOS 
+        WHERE USUARIO='${u}' AND CLAVE='${p}'
+    `;
+
+    execute.QueryToken(res,qry,'');
+
+
 }); 
 
 

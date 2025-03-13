@@ -4,7 +4,10 @@ function getView(){
             return `
                 <div class="col-12 p-0">
                     <div class="tab-content" id="myTabHomeContent">
-                        <div class="tab-pane fade show active" id="uno" role="tabpanel" aria-labelledby="receta-tab">
+                        <div class="tab-pane fade show active" id="cero" role="tabpanel" aria-labelledby="receta-tab">
+                            ${view.login()}
+                        </div>
+                        <div class="tab-pane fade" id="uno" role="tabpanel" aria-labelledby="receta-tab">
                             ${view.menu()}
                         </div>
                         <div class="tab-pane fade" id="dos" role="tabpanel" aria-labelledby="home-tab">
@@ -24,8 +27,12 @@ function getView(){
 
                     <ul class="nav nav-tabs oculto hidden" id="myTabHome" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active negrita text-success" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="profile" aria-selected="false">
+                            <a class="nav-link active negrita text-success" id="tab-cero" data-toggle="tab" href="#cero" role="tab" aria-controls="profile" aria-selected="false">
                                 <i class="fal fa-list"></i></a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link negrita text-danger" id="tab-uno" data-toggle="tab" href="#uno" role="tab" aria-controls="home" aria-selected="true">
+                                <i class="fal fa-comments"></i></a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link negrita text-danger" id="tab-dos" data-toggle="tab" href="#dos" role="tab" aria-controls="home" aria-selected="true">
@@ -47,6 +54,45 @@ function getView(){
                     
                 </div>
                ${view.modal_historial() + view.modal_pago_nuevo()}
+            `
+        },
+        login:()=>{
+            return `
+            <div class="row">
+                <div class="col-sm-0 col-md-3 col-lg-4 col-xl-4">
+                </div>
+                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+
+                    <div class="card card-rounded shadow col-12">
+                        <div class="card-body p-2">
+
+                            <img class="" width="100px" height="100px" src="./favicon.png">
+                            
+                            <br><br>
+
+                            <div class="form-group">
+                                <label class="negrita text-warning">Usuario</label>
+                                <input type="text" class="negrita form-control" id="txtUser" placeholder='Escriba su usuario...'>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="negrita text-warning">Clave</label>
+                                <input type="password" class="negrita form-control" id="txtPass" placeholder='Escriba su clave...'>
+                            </div>
+
+                            <br>
+
+                            <button  align="center" class="btn btn-circle btn-info btn-xl hand shadow mano" id="btnLogin">
+                                <i class="zmdi zmdi-lock zmdi-hc-fw"></i>
+                            </button>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-0 col-md-3 col-lg-4 col-xl-4">
+                </div>
+            </div>
             `
         },
         menu:()=>{
@@ -294,6 +340,9 @@ function getView(){
                         
                         <br>
 
+                        
+                        <h3 class="text-warning negrita" id="lbTotalPagos"></h3>
+
                         <table class="table table-bordered col-12 h-full" id="tblPagos">
                             <thead class="negrita">
                                 <tr>
@@ -414,13 +463,13 @@ function getView(){
                 </div>
             </div>
             `
-        },
-        
+        } 
     }
 
     root.innerHTML = view.body();
 
 };
+
 
 function addListeners(){
 
@@ -440,6 +489,8 @@ function addListeners(){
         tbl_pagos();  
     })
 
+
+
     document.getElementById('btnPendientes').addEventListener('click',()=>{
 
         document.getElementById('tab-cuatro').click();
@@ -454,7 +505,45 @@ function addListeners(){
     listeners_clientes();
 
     listeners_pagos();
+
+
+
+    let btnLogin = document.getElementById('btnLogin');
+    btnLogin.addEventListener('click',()=>{
+
+
+        let u = document.getElementById('txtUser').value || '';
+        let p = document.getElementById('txtPass').value || '';
+
+        if(u==''){F.AvisoError('Escriba su nombre de usuario');return;};
+        if(p==''){F.AvisoError('Escriba su clave');return;};
+
+
+        btnLogin.disabled = true;
+
+        fcn_login(u,p)
+        .then(()=>{
+
+            btnLogin.disabled = false;
+
+            document.getElementById('tab-uno').click();
+
+        })
+        .catch(()=>{
+
+            btnLogin.disabled = false;
+
+            F.AvisoError('Usuario o clave incorrectos');
+
+        })
+        
+
+    })
+
+
+
     
+
 };
 
 function initView(){
@@ -467,6 +556,33 @@ function initView(){
 initView();
 
 
+function fcn_login(usuario,clave){
+
+    return new Promise((resolve,reject)=>{
+   
+           axios.post('/login',{u:usuario,p:clave})
+           .then((response) => {
+               if(response.status.toString()=='200'){
+                   let data = response.data;
+                   if(data.toString()=="error"){
+                       reject();
+                   }else{
+                       if(Number(data.rowsAffected[0])>0){
+                           resolve(data);             
+                       }else{
+                           reject();
+                       } 
+                   }       
+               }else{
+                   reject();
+               }                   
+           }, (error) => {
+               reject();
+           });
+       }) 
+   
+};
+   
 
 
 
@@ -963,10 +1079,12 @@ function tbl_pagos(){
     container.innerHTML = GlobalLoader;
 
     let str = '';
+    let varTotal = 0;
 
     data_pagos(fi,ff)
     .then((data)=>{
         data.recordset.map((r)=>{
+            varTotal += Number(r.IMPORTE);
             let btnEP = `btnEP${r.ID}`;
             str += `
             <tr>
@@ -992,9 +1110,11 @@ function tbl_pagos(){
             `
         })
         container.innerHTML = str;
+        document.getElementById('lbTotalPagos').innerText = F.setMoneda(varTotal,'Q');
     })
     .catch(()=>{
         container.innerHTML = 'No se cargaron datos...';
+        document.getElementById('lbTotalPagos').innerText ='';
     })
 
 
